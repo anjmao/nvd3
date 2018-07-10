@@ -407,11 +407,11 @@
             }
 
             barSelection
-                    .select('rect')
-                    .attr('x', xFn)
-                    .attr('y', yFn)
-                    .attr('width', widthFn)
-                    .attr('height', heightFn);
+                .select('rect')
+                .attr('x', xFn)
+                .attr('y', yFn)
+                .attr('width', widthFn)
+                .attr('height', heightFn);
 
             bars.attr('transform', function (d, i) { return 'translate(' + x(getX(d, i)) + ',0)'; });
 
@@ -475,8 +475,8 @@
         forceY: { get: function () { return forceY; }, set: function (_) { forceY = _; } },
         stacked: { get: function () { return stacked; }, set: function (_) { stacked = _; } },
         showValues: { get: function () { return showValues; }, set: function (_) { showValues = _; } },
-        valueFormat:    {get: function(){return valueFormat;}, set: function(_){valueFormat=_;}},
-        valueStyle:    {get: function(){return valueStyle;}, set: function(_){valueStyle=_;}},
+        valueFormat: { get: function () { return valueFormat; }, set: function (_) { valueFormat = _; } },
+        valueStyle: { get: function () { return valueStyle; }, set: function (_) { valueStyle = _; } },
         stackOffset: { get: function () { return stackOffset; }, set: function (_) { stackOffset = _; } },
         clipEdge: { get: function () { return clipEdge; }, set: function (_) { clipEdge = _; } },
         disabled: { get: function () { return disabled; }, set: function (_) { disabled = _; } },
