@@ -1,4 +1,4 @@
-/* nvd3 version 1.8.9 (https://github.com/anjmao/nvd3) 2018-04-04 */
+/* nvd3 version 1.9.3 (https://github.com/anjmao/nvd3) 2018-07-10 */
 (function(){
 // set up main nv object
 var nv = {};
@@ -10509,48 +10509,105 @@ nv.models.multiChart = function () {
     //============================================================
     // Public Variables with Default Settings
     //------------------------------------------------------------
-    var margin = { top: 30, right: 20, bottom: 50, left: 60 }, marginTop = null, color = nv.utils.defaultColor(), width = null, height = null, showLegend = true, noData = null, yDomain1, yDomain2, getX = function (d) { return d.x; }, getY = function (d) { return d.y; }, interpolate = 'linear', useVoronoi = true, interactiveLayer = nv.interactiveGuideline(), useInteractiveGuideline = false, legendRightAxisHint = ' (right axis)', duration = 250;
+    var margin = {
+        top: 30,
+        right: 20,
+        bottom: 50,
+        left: 60
+    }, marginTop = null, color = nv.utils.defaultColor(), width = null, height = null, showLegend = true, noData = null, yDomain1, yDomain2, getX = function (d) {
+        return d.x;
+    }, getY = function (d) {
+        return d.y;
+    }, interpolate = 'linear', useVoronoi = true, showValues = false, interactiveLayer = nv.interactiveGuideline(), useInteractiveGuideline = false, legendRightAxisHint = ' (right axis)', duration = 250;
     //============================================================
     // Private Variables
     //------------------------------------------------------------
-    var x = d3.scale.linear(), yScale1 = d3.scale.linear(), yScale2 = d3.scale.linear(), lines1 = nv.models.line().yScale(yScale1).duration(duration), lines2 = nv.models.line().yScale(yScale2).duration(duration), scatters1 = nv.models.scatter().yScale(yScale1).duration(duration), scatters2 = nv.models.scatter().yScale(yScale2).duration(duration), bars1 = nv.models.multiBar().stacked(false).yScale(yScale1).duration(duration), bars2 = nv.models.multiBar().stacked(false).yScale(yScale2).duration(duration), stack1 = nv.models.stackedArea().yScale(yScale1).duration(duration), stack2 = nv.models.stackedArea().yScale(yScale2).duration(duration), xAxis = nv.models.axis().scale(x).orient('bottom').tickPadding(5).duration(duration), yAxis1 = nv.models.axis().scale(yScale1).orient('left').duration(duration), yAxis2 = nv.models.axis().scale(yScale2).orient('right').duration(duration), legend = nv.models.legend().height(30), tooltip = nv.models.tooltip(), dispatch = d3.dispatch();
+    var yScale1 = d3.scale.linear();
+    var yScale2 = d3.scale.linear();
+    var lines1 = nv.models.line().yScale(yScale1).duration(duration).clipEdge(true);
+    var lines2 = nv.models.line().yScale(yScale2).duration(duration);
+    var scatters1 = nv.models.scatter().yScale(yScale1).duration(duration);
+    var scatters2 = nv.models.scatter().yScale(yScale2).duration(duration);
+    var bars1 = nv.models.multiBar().stacked(false).duration(duration);
+    var bars2 = nv.models.multiBar().stacked(false).duration(duration);
+    var stack1 = nv.models.stackedArea().yScale(yScale1).duration(duration);
+    var stack2 = nv.models.stackedArea().yScale(yScale2).duration(duration);
+    var x = bars1.xScale();
+    var xAxis = nv.models.axis().scale(x).orient('bottom').tickPadding(5).duration(duration);
+    var yAxis1 = nv.models.axis().scale(yScale1).orient('left').duration(duration);
+    var yAxis2 = nv.models.axis().scale(yScale2).orient('right').duration(duration);
+    var legend = nv.models.legend().height(30);
+    var tooltip = nv.models.tooltip();
+    var dispatch = d3.dispatch();
     var charts = [lines1, lines2, scatters1, scatters2, bars1, bars2, stack1, stack2];
     function chart(selection) {
         selection.each(function (data) {
             var container = d3.select(this), that = this;
             nv.utils.initSVG(container);
-            chart.update = function () { container.transition().call(chart); };
+            chart.update = function () {
+                container.transition().call(chart);
+            };
             chart.container = this;
             var availableWidth = nv.utils.availableWidth(width, container, margin), availableHeight = nv.utils.availableHeight(height, container, margin);
-            var dataLines1 = data.filter(function (d) { return d.type == 'line' && d.yAxis == 1; });
-            var dataLines2 = data.filter(function (d) { return d.type == 'line' && d.yAxis == 2; });
-            var dataScatters1 = data.filter(function (d) { return d.type == 'scatter' && d.yAxis == 1; });
-            var dataScatters2 = data.filter(function (d) { return d.type == 'scatter' && d.yAxis == 2; });
-            var dataBars1 = data.filter(function (d) { return d.type == 'bar' && d.yAxis == 1; });
-            var dataBars2 = data.filter(function (d) { return d.type == 'bar' && d.yAxis == 2; });
-            var dataStack1 = data.filter(function (d) { return d.type == 'area' && d.yAxis == 1; });
-            var dataStack2 = data.filter(function (d) { return d.type == 'area' && d.yAxis == 2; });
+            var dataLines1 = data.filter(function (d) {
+                return d.type == 'line' && d.yAxis == 1;
+            });
+            var dataLines2 = data.filter(function (d) {
+                return d.type == 'line' && d.yAxis == 2;
+            });
+            var dataScatters1 = data.filter(function (d) {
+                return d.type == 'scatter' && d.yAxis == 1;
+            });
+            var dataScatters2 = data.filter(function (d) {
+                return d.type == 'scatter' && d.yAxis == 2;
+            });
+            var dataBars1 = data.filter(function (d) {
+                return d.type == 'bar' && d.yAxis == 1;
+            });
+            var dataBars2 = data.filter(function (d) {
+                return d.type == 'bar' && d.yAxis == 2;
+            });
+            var dataStack1 = data.filter(function (d) {
+                return d.type == 'area' && d.yAxis == 1;
+            });
+            var dataStack2 = data.filter(function (d) {
+                return d.type == 'area' && d.yAxis == 2;
+            });
             // Display noData message if there's nothing to show.
-            if (!data || !data.length || !data.filter(function (d) { return d.values.length; }).length) {
+            if (!data || !data.length || !data.filter(function (d) {
+                return d.values.length;
+            }).length) {
                 nv.utils.noData(chart, container);
                 return chart;
             }
             else {
                 container.selectAll('.nv-noData').remove();
             }
-            var series1 = data.filter(function (d) { return !d.disabled && d.yAxis == 1; })
+            var series1 = data.filter(function (d) {
+                return !d.disabled && d.yAxis == 1;
+            })
                 .map(function (d) {
                 return d.values.map(function (d, i) {
-                    return { x: getX(d), y: getY(d) };
+                    return {
+                        x: getX(d),
+                        y: getY(d)
+                    };
                 });
             });
-            var series2 = data.filter(function (d) { return !d.disabled && d.yAxis == 2; })
+            var series2 = data.filter(function (d) {
+                return !d.disabled && d.yAxis == 2;
+            })
                 .map(function (d) {
                 return d.values.map(function (d, i) {
-                    return { x: getX(d), y: getY(d) };
+                    return {
+                        x: getX(d),
+                        y: getY(d)
+                    };
                 });
             });
-            x.domain(d3.extent(d3.merge(series1.concat(series2)), function (d) { return d.x; }))
+            x.domain(d3.extent(d3.merge(series1.concat(series2)), function (d) {
+                return d.x;
+            }))
                 .range([0, availableWidth]);
             var wrap = container.selectAll('g.wrap.multiChart').data([data]);
             var gEnter = wrap.enter().append('g').attr('class', 'wrap nvd3 multiChart').append('g');
@@ -10598,80 +10655,140 @@ nv.models.multiChart = function () {
                 .width(availableWidth)
                 .height(availableHeight)
                 .interpolate(interpolate)
-                .color(color_array.filter(function (d, i) { return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'line'; }));
+                .color(color_array.filter(function (d, i) {
+                return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'line';
+            }));
             lines2
                 .width(availableWidth)
                 .height(availableHeight)
                 .interpolate(interpolate)
-                .color(color_array.filter(function (d, i) { return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'line'; }));
+                .color(color_array.filter(function (d, i) {
+                return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'line';
+            }));
             scatters1
                 .width(availableWidth)
                 .height(availableHeight)
-                .color(color_array.filter(function (d, i) { return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'scatter'; }));
+                .color(color_array.filter(function (d, i) {
+                return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'scatter';
+            }));
             scatters2
                 .width(availableWidth)
                 .height(availableHeight)
-                .color(color_array.filter(function (d, i) { return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'scatter'; }));
+                .color(color_array.filter(function (d, i) {
+                return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'scatter';
+            }));
             bars1
                 .width(availableWidth)
                 .height(availableHeight)
-                .color(color_array.filter(function (d, i) { return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'bar'; }));
+                .color(color_array.filter(function (d, i) {
+                return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'bar';
+            }));
             bars2
                 .width(availableWidth)
                 .height(availableHeight)
-                .color(color_array.filter(function (d, i) { return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'bar'; }));
+                .color(color_array.filter(function (d, i) {
+                return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'bar';
+            }));
             stack1
                 .width(availableWidth)
                 .height(availableHeight)
                 .interpolate(interpolate)
-                .color(color_array.filter(function (d, i) { return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'area'; }));
+                .color(color_array.filter(function (d, i) {
+                return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'area';
+            }));
             stack2
                 .width(availableWidth)
                 .height(availableHeight)
                 .interpolate(interpolate)
-                .color(color_array.filter(function (d, i) { return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'area'; }));
+                .color(color_array.filter(function (d, i) {
+                return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'area';
+            }));
             g.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
             var lines1Wrap = g.select('.lines1Wrap')
-                .datum(dataLines1.filter(function (d) { return !d.disabled; }));
+                .datum(dataLines1.filter(function (d) {
+                return !d.disabled;
+            }));
             var scatters1Wrap = g.select('.scatters1Wrap')
-                .datum(dataScatters1.filter(function (d) { return !d.disabled; }));
+                .datum(dataScatters1.filter(function (d) {
+                return !d.disabled;
+            }));
             var bars1Wrap = g.select('.bars1Wrap')
-                .datum(dataBars1.filter(function (d) { return !d.disabled; }));
+                .datum(dataBars1.filter(function (d) {
+                return !d.disabled;
+            }));
             var stack1Wrap = g.select('.stack1Wrap')
-                .datum(dataStack1.filter(function (d) { return !d.disabled; }));
+                .datum(dataStack1.filter(function (d) {
+                return !d.disabled;
+            }));
             var lines2Wrap = g.select('.lines2Wrap')
-                .datum(dataLines2.filter(function (d) { return !d.disabled; }));
+                .datum(dataLines2.filter(function (d) {
+                return !d.disabled;
+            }));
             var scatters2Wrap = g.select('.scatters2Wrap')
-                .datum(dataScatters2.filter(function (d) { return !d.disabled; }));
+                .datum(dataScatters2.filter(function (d) {
+                return !d.disabled;
+            }));
             var bars2Wrap = g.select('.bars2Wrap')
-                .datum(dataBars2.filter(function (d) { return !d.disabled; }));
+                .datum(dataBars2.filter(function (d) {
+                return !d.disabled;
+            }));
             var stack2Wrap = g.select('.stack2Wrap')
-                .datum(dataStack2.filter(function (d) { return !d.disabled; }));
+                .datum(dataStack2.filter(function (d) {
+                return !d.disabled;
+            }));
             var extraValue1BarStacked = [];
             if (bars1.stacked() && dataBars1.length) {
-                var extraValue1BarStacked = dataBars1.filter(function (d) { return !d.disabled; }).map(function (a) { return a.values; });
+                var extraValue1BarStacked = dataBars1.filter(function (d) {
+                    return !d.disabled;
+                }).map(function (a) {
+                    return a.values;
+                });
                 if (extraValue1BarStacked.length > 0)
                     extraValue1BarStacked = extraValue1BarStacked.reduce(function (a, b) {
-                        return a.map(function (aVal, i) { return { x: aVal.x, y: aVal.y + b[i].y }; });
+                        return a.map(function (aVal, i) {
+                            return {
+                                x: aVal.x,
+                                y: aVal.y + b[i].y
+                            };
+                        });
                     });
             }
             if (dataBars1.length) {
-                extraValue1BarStacked.push({ x: 0, y: 0 });
+                extraValue1BarStacked.push({
+                    x: 0,
+                    y: 0
+                });
             }
             var extraValue2BarStacked = [];
             if (bars2.stacked() && dataBars2.length) {
-                var extraValue2BarStacked = dataBars2.filter(function (d) { return !d.disabled; }).map(function (a) { return a.values; });
+                var extraValue2BarStacked = dataBars2.filter(function (d) {
+                    return !d.disabled;
+                }).map(function (a) {
+                    return a.values;
+                });
                 if (extraValue2BarStacked.length > 0)
                     extraValue2BarStacked = extraValue2BarStacked.reduce(function (a, b) {
-                        return a.map(function (aVal, i) { return { x: aVal.x, y: aVal.y + b[i].y }; });
+                        return a.map(function (aVal, i) {
+                            return {
+                                x: aVal.x,
+                                y: aVal.y + b[i].y
+                            };
+                        });
                     });
             }
             if (dataBars2.length) {
-                extraValue2BarStacked.push({ x: 0, y: 0 });
+                extraValue2BarStacked.push({
+                    x: 0,
+                    y: 0
+                });
             }
-            yScale1.domain(yDomain1 || d3.extent(d3.merge(series1).concat(extraValue1BarStacked), function (d) { return d.y; }))
+            yScale1.domain(yDomain1 || d3.extent(d3.merge(series1).concat(extraValue1BarStacked), function (d) {
+                return d.y;
+            }))
                 .range([0, availableHeight]);
-            yScale2.domain(yDomain2 || d3.extent(d3.merge(series2).concat(extraValue2BarStacked), function (d) { return d.y; }))
+            yScale2.domain(yDomain2 || d3.extent(d3.merge(series2).concat(extraValue2BarStacked), function (d) {
+                return d.y;
+            }))
                 .range([0, availableHeight]);
             lines1.yDomain(yScale1.domain());
             scatters1.yDomain(yScale1.domain());
@@ -10735,7 +10852,10 @@ nv.models.multiChart = function () {
                 interactiveLayer
                     .width(availableWidth)
                     .height(availableHeight)
-                    .margin({ left: margin.left, top: margin.top })
+                    .margin({
+                    left: margin.left,
+                    top: margin.top
+                })
                     .svgContainer(container)
                     .xScale(x);
                 wrap.select(".nv-interactive").call(interactiveLayer);
@@ -10995,17 +11115,95 @@ nv.models.multiChart = function () {
     chart.options = nv.utils.optionsFunc.bind(chart);
     chart._options = Object.create({}, {
         // simple options, just get/set the necessary values
-        width: { get: function () { return width; }, set: function (_) { width = _; } },
-        height: { get: function () { return height; }, set: function (_) { height = _; } },
-        showLegend: { get: function () { return showLegend; }, set: function (_) { showLegend = _; } },
-        xScale: { get: function () { return x; }, set: function (_) { x = _; xAxis.scale(x); } },
-        yDomain1: { get: function () { return yDomain1; }, set: function (_) { yDomain1 = _; } },
-        yDomain2: { get: function () { return yDomain2; }, set: function (_) { yDomain2 = _; } },
-        noData: { get: function () { return noData; }, set: function (_) { noData = _; } },
-        interpolate: { get: function () { return interpolate; }, set: function (_) { interpolate = _; } },
-        legendRightAxisHint: { get: function () { return legendRightAxisHint; }, set: function (_) { legendRightAxisHint = _; } },
+        width: {
+            get: function () {
+                return width;
+            },
+            set: function (_) {
+                width = _;
+            }
+        },
+        height: {
+            get: function () {
+                return height;
+            },
+            set: function (_) {
+                height = _;
+            }
+        },
+        showLegend: {
+            get: function () {
+                return showLegend;
+            },
+            set: function (_) {
+                showLegend = _;
+            }
+        },
+        showValues: {
+            get: function () {
+                return showValues;
+            },
+            set: function (_) {
+                showValues = _;
+                bars1.showValues(_);
+                bars2.showValues(_);
+            }
+        },
+        xScale: {
+            get: function () {
+                return x;
+            },
+            set: function (_) {
+                x = _;
+                xAxis.scale(x);
+            }
+        },
+        yDomain1: {
+            get: function () {
+                return yDomain1;
+            },
+            set: function (_) {
+                yDomain1 = _;
+            }
+        },
+        yDomain2: {
+            get: function () {
+                return yDomain2;
+            },
+            set: function (_) {
+                yDomain2 = _;
+            }
+        },
+        noData: {
+            get: function () {
+                return noData;
+            },
+            set: function (_) {
+                noData = _;
+            }
+        },
+        interpolate: {
+            get: function () {
+                return interpolate;
+            },
+            set: function (_) {
+                interpolate = _;
+            }
+        },
+        legendRightAxisHint: {
+            get: function () {
+                return legendRightAxisHint;
+            },
+            set: function (_) {
+                legendRightAxisHint = _;
+            }
+        },
         // options that require extra logic in the setter
-        margin: { get: function () { return margin; }, set: function (_) {
+        margin: {
+            get: function () {
+                return margin;
+            },
+            set: function (_) {
                 if (_.top !== undefined) {
                     margin.top = _.top;
                     marginTop = _.top;
@@ -11013,11 +11211,21 @@ nv.models.multiChart = function () {
                 margin.right = _.right !== undefined ? _.right : margin.right;
                 margin.bottom = _.bottom !== undefined ? _.bottom : margin.bottom;
                 margin.left = _.left !== undefined ? _.left : margin.left;
-            } },
-        color: { get: function () { return color; }, set: function (_) {
+            }
+        },
+        color: {
+            get: function () {
+                return color;
+            },
+            set: function (_) {
                 color = nv.utils.getColor(_);
-            } },
-        x: { get: function () { return getX; }, set: function (_) {
+            }
+        },
+        x: {
+            get: function () {
+                return getX;
+            },
+            set: function (_) {
                 getX = _;
                 lines1.x(_);
                 lines2.x(_);
@@ -11027,8 +11235,13 @@ nv.models.multiChart = function () {
                 bars2.x(_);
                 stack1.x(_);
                 stack2.x(_);
-            } },
-        y: { get: function () { return getY; }, set: function (_) {
+            }
+        },
+        y: {
+            get: function () {
+                return getY;
+            },
+            set: function (_) {
                 getY = _;
                 lines1.y(_);
                 lines2.y(_);
@@ -11038,15 +11251,25 @@ nv.models.multiChart = function () {
                 stack2.y(_);
                 bars1.y(_);
                 bars2.y(_);
-            } },
-        useVoronoi: { get: function () { return useVoronoi; }, set: function (_) {
+            }
+        },
+        useVoronoi: {
+            get: function () {
+                return useVoronoi;
+            },
+            set: function (_) {
                 useVoronoi = _;
                 lines1.useVoronoi(_);
                 lines2.useVoronoi(_);
                 stack1.useVoronoi(_);
                 stack2.useVoronoi(_);
-            } },
-        useInteractiveGuideline: { get: function () { return useInteractiveGuideline; }, set: function (_) {
+            }
+        },
+        useInteractiveGuideline: {
+            get: function () {
+                return useInteractiveGuideline;
+            },
+            set: function (_) {
                 useInteractiveGuideline = _;
                 if (useInteractiveGuideline) {
                     lines1.interactive(false);
@@ -11060,13 +11283,19 @@ nv.models.multiChart = function () {
                     scatters1.interactive(false);
                     scatters2.interactive(false);
                 }
-            } },
-        duration: { get: function () { return duration; }, set: function (_) {
+            }
+        },
+        duration: {
+            get: function () {
+                return duration;
+            },
+            set: function (_) {
                 duration = _;
                 [lines1, lines2, stack1, stack2, scatters1, scatters2, xAxis, yAxis1, yAxis2].forEach(function (model) {
                     model.duration(duration);
                 });
-            } }
+            }
+        }
     });
     nv.utils.initOptions(chart);
     return chart;
@@ -15457,6 +15686,6 @@ nv.models.sunburstChart = function () {
     return chart;
 };
 
-nv.version = "1.8.9";
+nv.version = "1.9.3";
 })();
 //# sourceMappingURL=nv.d3.js.map
