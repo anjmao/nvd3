@@ -28,6 +28,7 @@ nv.models.multiChart = function () {
         interpolate = 'linear',
         useVoronoi = true,
         showValues = false,
+        valueFormat = d3.format(',.1f'),
         interactiveLayer = nv.interactiveGuideline(),
         useInteractiveGuideline = false,
         legendRightAxisHint = ' (right axis)',
@@ -137,10 +138,10 @@ nv.models.multiChart = function () {
                     })
                 });
 
-                x.domain(d3.extent(d3.merge(series1.concat(series2)), function (d) {
-                    return d.x
-                }))
-                    .range([0, availableWidth]);
+            x.domain(d3.extent(d3.merge(series1.concat(series2)), function (d) {
+                return d.x
+            }))
+                .range([0, availableWidth]);
 
             var wrap = container.selectAll('g.wrap.multiChart').data([data]);
             var gEnter = wrap.enter().append('g').attr('class', 'wrap nvd3 multiChart').append('g');
@@ -585,20 +586,17 @@ nv.models.multiChart = function () {
                             return !series.disabled;
                         })
                         .forEach(function (series, i) {
-                            var extent = x.domain();
-                            var currentValues = series.values.filter(function (d, i) {
-                                return chart.x()(d, i) >= extent[0] && chart.x()(d, i) <= extent[1];
-                            });
+                            var currentValues = series.values;
 
-                            pointIndex = nv.interactiveBisect(currentValues, e.pointXValue, chart.x());
+                            pointIndex = e.pointXValue;;
                             var point = currentValues[pointIndex];
                             var pointYValue = chart.y()(point, pointIndex);
-                            if (pointYValue !== null && !isNaN(pointYValue) && !series.noHighlightSeries) {
-                                highlightPoint(series, pointIndex, true);
-                            }
                             if (point === undefined) return;
                             if (singlePoint === undefined) singlePoint = point;
-                            if (pointXLocation === undefined) pointXLocation = x(chart.x()(point, pointIndex));
+                            if (pointXLocation === undefined) {
+                                pointXLocation = x(chart.x()(point, pointIndex)) + x.rangeBand() / 2;
+                            }
+
                             allData.push({
                                 key: series.key,
                                 value: pointYValue,
@@ -727,13 +725,19 @@ nv.models.multiChart = function () {
             }
         },
         showValues: {
-            get: function () {
-                return showValues;
-            },
-            set: function (_) {
+            get: () => showValues,
+            set: (_) => {
                 showValues = _;
                 bars1.showValues(_);
                 bars2.showValues(_);
+            }
+        },
+        valueFormat: {
+            get: () => valueFormat,
+            set: (_) => {
+                valueFormat = _;
+                bars1.valueFormat(_);
+                bars2.valueFormat(_);
             }
         },
         xScale: {

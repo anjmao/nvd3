@@ -1,4 +1,4 @@
-/* nvd3 version 1.9.3 (https://github.com/anjmao/nvd3) 2018-07-10 */
+/* nvd3 version 1.9.4 (https://github.com/anjmao/nvd3) 2018-07-11 */
 (function(){
 // set up main nv object
 var nv = {};
@@ -9339,6 +9339,7 @@ nv.models.multiBar = function () {
     function chart(selection) {
         renderWatch.reset();
         selection.each(function (data) {
+            var _a, _b;
             var availableWidth = width - margin.left - margin.right;
             var availableHeight = height - margin.top - margin.bottom;
             var nonStackableCount = prepareData(data);
@@ -9397,7 +9398,6 @@ nv.models.multiBar = function () {
             if (data[0] && data[0].values) {
                 last_datalength = data[0].values.length;
             }
-            var _a, _b;
         });
         renderWatch.renderEnd('multibar immediate');
         return chart;
@@ -10518,7 +10518,7 @@ nv.models.multiChart = function () {
         return d.x;
     }, getY = function (d) {
         return d.y;
-    }, interpolate = 'linear', useVoronoi = true, showValues = false, interactiveLayer = nv.interactiveGuideline(), useInteractiveGuideline = false, legendRightAxisHint = ' (right axis)', duration = 250;
+    }, interpolate = 'linear', useVoronoi = true, showValues = false, valueFormat = d3.format(',.1f'), interactiveLayer = nv.interactiveGuideline(), useInteractiveGuideline = false, legendRightAxisHint = ' (right axis)', duration = 250;
     //============================================================
     // Private Variables
     //------------------------------------------------------------
@@ -11007,22 +11007,18 @@ nv.models.multiChart = function () {
                         return !series.disabled;
                     })
                         .forEach(function (series, i) {
-                        var extent = x.domain();
-                        var currentValues = series.values.filter(function (d, i) {
-                            return chart.x()(d, i) >= extent[0] && chart.x()(d, i) <= extent[1];
-                        });
-                        pointIndex = nv.interactiveBisect(currentValues, e.pointXValue, chart.x());
+                        var currentValues = series.values;
+                        pointIndex = e.pointXValue;
+                        ;
                         var point = currentValues[pointIndex];
                         var pointYValue = chart.y()(point, pointIndex);
-                        if (pointYValue !== null && !isNaN(pointYValue) && !series.noHighlightSeries) {
-                            highlightPoint(series, pointIndex, true);
-                        }
                         if (point === undefined)
                             return;
                         if (singlePoint === undefined)
                             singlePoint = point;
-                        if (pointXLocation === undefined)
-                            pointXLocation = x(chart.x()(point, pointIndex));
+                        if (pointXLocation === undefined) {
+                            pointXLocation = x(chart.x()(point, pointIndex)) + x.rangeBand() / 2;
+                        }
                         allData.push({
                             key: series.key,
                             value: pointYValue,
@@ -11140,13 +11136,19 @@ nv.models.multiChart = function () {
             }
         },
         showValues: {
-            get: function () {
-                return showValues;
-            },
+            get: function () { return showValues; },
             set: function (_) {
                 showValues = _;
                 bars1.showValues(_);
                 bars2.showValues(_);
+            }
+        },
+        valueFormat: {
+            get: function () { return valueFormat; },
+            set: function (_) {
+                valueFormat = _;
+                bars1.valueFormat(_);
+                bars2.valueFormat(_);
             }
         },
         xScale: {
@@ -15686,6 +15688,6 @@ nv.models.sunburstChart = function () {
     return chart;
 };
 
-nv.version = "1.9.3";
+nv.version = "1.9.4";
 })();
 //# sourceMappingURL=nv.d3.js.map
